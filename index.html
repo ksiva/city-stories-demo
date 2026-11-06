@@ -1,0 +1,2644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="data:,">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>City Stories · Delhi Documentary Experience</title>
+  <style>
+    /* ==========================================================================
+       RESET & BASE STYLES
+       No outside requests: system font stack, pure CSS & inline SVG
+       ========================================================================== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    :root {
+      --bg-canvas: #07090e;
+      --bg-surface: #101522;
+      --bg-card: #171e2e;
+      --bg-card-hover: #1f283c;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(245, 158, 11, 0.4);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-amber: #f59e0b;
+      --accent-amber-light: #fbbf24;
+      --accent-cyan: #38bdf8;
+      --accent-emerald: #10b981;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-full: 9999px;
+      --shadow-elevation: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --touch-min: 44px;
+    }
+
+    body {
+      background-color: #06080d;
+      color: var(--text-primary);
+      font-family: var(--font-family);
+      line-height: 1.5;
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+      padding: 16px;
+    }
+
+    /* Desktop centering & simulated phone frame */
+    .app-viewport {
+      width: 100%;
+      max-width: 420px;
+      height: 880px;
+      max-height: 94vh;
+      background: var(--bg-surface);
+      border-radius: 42px;
+      box-shadow: 0 25px 65px -10px rgba(0, 0, 0, 0.85), 0 0 0 10px #1a2233, 0 0 0 12px #2b354b;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* On mobile devices, fill the entire screen seamlessly */
+    @media (max-width: 600px) {
+      body {
+        padding: 0;
+        background: var(--bg-surface);
+      }
+      .app-viewport {
+        max-width: 100vw;
+        height: 100vh;
+        height: 100dvh;
+        max-height: none;
+        border-radius: 0;
+        box-shadow: none;
+      }
+    }
+
+    /* Accessibility focus ring */
+    :focus-visible {
+      outline: 2px solid var(--accent-amber);
+      outline-offset: 2px;
+    }
+
+    button {
+      font-family: inherit;
+      border: none;
+      background: none;
+      color: inherit;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: var(--touch-min);
+      min-height: var(--touch-min);
+      border-radius: var(--radius-sm);
+      user-select: none;
+      transition: background-color 0.15s ease, transform 0.15s ease, opacity 0.15s ease;
+    }
+
+    button:active {
+      transform: scale(0.97);
+    }
+
+    /* Screen management */
+    .screen {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+      height: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    .screen.is-active {
+      display: flex;
+    }
+
+    /* Header Bar */
+    .app-header {
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      background: rgba(16, 21, 34, 0.95);
+      border-bottom: 1px solid var(--border-subtle);
+      z-index: 20;
+      flex-shrink: 0;
+    }
+
+    .brand-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-primary);
+    }
+
+    .brand-badge {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      background: rgba(245, 158, 11, 0.18);
+      color: var(--accent-amber-light);
+      padding: 2px 7px;
+      border-radius: var(--radius-full);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    /* ==========================================================================
+       SCREEN 1: CITY PICKER
+       ========================================================================== */
+    .picker-container {
+      padding: 24px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .hero-text {
+      margin-bottom: 6px;
+    }
+
+    .hero-text h1 {
+      font-size: 1.45rem;
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 6px;
+      color: var(--text-primary);
+    }
+
+    .hero-text p {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
+
+    .city-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: border-color 0.2s ease, transform 0.2s ease;
+      position: relative;
+    }
+
+    .city-card.is-playable {
+      border-color: rgba(245, 158, 11, 0.4);
+      box-shadow: 0 8px 24px -6px rgba(245, 158, 11, 0.15);
+      cursor: pointer;
+    }
+
+    .city-card.is-playable:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--accent-amber);
+      transform: translateY(-2px);
+    }
+
+    .city-card.is-disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      filter: grayscale(0.6);
+    }
+
+    .card-banner {
+      height: 105px;
+      position: relative;
+      background: #0f172a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .card-content {
+      padding: 14px 16px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .card-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+    }
+
+    .card-tag {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-secondary);
+    }
+
+    .card-tag.playable {
+      background: rgba(16, 185, 129, 0.18);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .card-desc {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+
+    .card-footer {
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--accent-amber-light);
+    }
+
+    /* ==========================================================================
+       SCREEN 2: DOCUMENTARY PLAYER & TIMELINE
+       ========================================================================== */
+    .player-view {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      position: relative;
+    }
+
+    /* Simulated Film Box */
+    .film-container {
+      position: relative;
+      width: 100%;
+      background: #000;
+      aspect-ratio: 16 / 9;
+      flex-shrink: 0;
+      overflow: hidden;
+      cursor: pointer;
+      transition: height 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    #film-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+    }
+
+    /* Notice overlay */
+    .simulated-notice {
+      position: absolute;
+      top: 10px;
+      left: 12px;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(4px);
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+      font-size: 0.65rem;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .time-badge {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(4px);
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+      font-size: 0.68rem;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    /* Subtitle caption overlay */
+    .caption-banner {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 10px 14px;
+      background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.85) 60%, rgba(0, 0, 0, 0.95) 100%);
+      color: #f1f5f9;
+      font-size: 0.78rem;
+      line-height: 1.35;
+      text-align: center;
+      pointer-events: none;
+      z-index: 10;
+      min-height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Moment Pill (slides in when film reaches a moment) */
+    .moment-pill {
+      position: absolute;
+      top: 42px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-30px);
+      opacity: 0;
+      pointer-events: none;
+      background: rgba(15, 23, 42, 0.94);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--accent-amber);
+      box-shadow: 0 10px 25px -4px rgba(245, 158, 11, 0.3);
+      border-radius: var(--radius-full);
+      padding: 6px 14px 6px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #fff;
+      z-index: 15;
+      cursor: pointer;
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+      white-space: nowrap;
+      min-height: var(--touch-min);
+    }
+
+    .moment-pill.is-visible {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .moment-pill-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-amber);
+      box-shadow: 0 0 10px var(--accent-amber);
+      animation: pulseDot 1.5s infinite;
+    }
+
+    @keyframes pulseDot {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.6; }
+    }
+
+    /* Play/Pause feedback ripple */
+    .play-pulse-indicator {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.6);
+      width: 56px;
+      height: 56px;
+      background: rgba(0, 0, 0, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      z-index: 12;
+    }
+
+    .play-pulse-indicator.animate {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+    }
+
+    /* Controls Bar */
+    .player-controls {
+      background: #0d121c;
+      padding: 8px 14px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      border-bottom: 1px solid var(--border-subtle);
+      z-index: 10;
+    }
+
+    /* Progress bar with moment dots */
+    .scrubber-wrapper {
+      position: relative;
+      height: var(--touch-min);
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      touch-action: none;
+    }
+
+    .progress-track {
+      position: relative;
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 3px;
+      overflow: visible;
+    }
+
+    .progress-fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      background: linear-gradient(90deg, #f59e0b, #fbbf24);
+      border-radius: 3px;
+      width: 0%;
+      pointer-events: none;
+    }
+
+    .scrubber-thumb {
+      position: absolute;
+      top: 50%;
+      left: 0%;
+      transform: translate(-50%, -50%);
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 0 8px rgba(0,0,0,0.6);
+      pointer-events: none;
+      transition: transform 0.1s ease;
+    }
+
+    .scrubber-wrapper:hover .scrubber-thumb {
+      transform: translate(-50%, -50%) scale(1.2);
+    }
+
+    /* Moment dots on progress bar */
+    .moment-dot {
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #1e293b;
+      border: 2px solid var(--accent-amber);
+      cursor: pointer;
+      z-index: 5;
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+
+    .moment-dot.explored {
+      background: var(--accent-emerald);
+      border-color: #34d399;
+    }
+
+    .moment-dot:hover, .moment-dot:focus-visible {
+      transform: translate(-50%, -50%) scale(1.4);
+    }
+
+    .controls-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .controls-left, .controls-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .control-btn {
+      width: var(--touch-min);
+      height: var(--touch-min);
+      border-radius: var(--radius-full);
+      color: var(--text-primary);
+    }
+
+    .control-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .control-btn.is-active {
+      color: var(--accent-amber);
+    }
+
+    .time-readout {
+      font-size: 0.78rem;
+      font-variant-numeric: tabular-nums;
+      color: var(--text-secondary);
+      font-weight: 500;
+      margin-left: 4px;
+    }
+
+    /* ==========================================================================
+       TABS & CONTENT BELOW PLAYER
+       ========================================================================== */
+    .tabs-bar {
+      display: flex;
+      border-bottom: 1px solid var(--border-subtle);
+      background: #0f1523;
+    }
+
+    .tab-btn {
+      flex: 1;
+      height: 44px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      position: relative;
+      border-radius: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .tab-btn.is-active {
+      color: var(--accent-amber-light);
+    }
+
+    .tab-btn.is-active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 12%;
+      right: 12%;
+      height: 2px;
+      background: var(--accent-amber);
+      border-radius: 2px 2px 0 0;
+    }
+
+    .tab-count {
+      font-size: 0.7rem;
+      padding: 1px 6px;
+      border-radius: var(--radius-full);
+      background: rgba(255, 255, 255, 0.1);
+      color: inherit;
+    }
+
+    .tab-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px 16px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* Moment cards in Timeline & Saved tabs */
+    .timeline-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: border-color 0.15s ease, background-color 0.15s ease;
+      position: relative;
+    }
+
+    .timeline-card:hover {
+      background: var(--bg-card-hover);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .timeline-card.is-current {
+      border-color: var(--accent-amber);
+      background: rgba(245, 158, 11, 0.05);
+    }
+
+    .timeline-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .timeline-badge-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .timeline-time {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--accent-amber-light);
+      background: rgba(245, 158, 11, 0.15);
+      padding: 2px 6px;
+      border-radius: var(--radius-sm);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .timeline-status {
+      font-size: 0.68rem;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-muted);
+    }
+
+    .timeline-status.explored {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+    }
+
+    .timeline-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .timeline-fact {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      line-height: 1.42;
+    }
+
+    .timeline-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 4px;
+      padding-top: 6px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .jump-btn {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--accent-cyan);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 8px;
+    }
+
+    .jump-btn:hover {
+      background: rgba(56, 189, 248, 0.1);
+    }
+
+    .empty-state {
+      padding: 36px 16px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-muted);
+    }
+
+    .empty-state p {
+      font-size: 0.84rem;
+      max-width: 240px;
+      line-height: 1.4;
+    }
+
+    /* ==========================================================================
+       MINI-PLAYER & DIVE IN READING SHEET
+       ========================================================================== */
+    /* When sheet is open, player shrinks to pinned mini-player at top */
+    .film-container.mini-mode {
+      height: 76px;
+      aspect-ratio: auto;
+      border-bottom: 1px solid var(--border-accent);
+      z-index: 40;
+    }
+
+    .mini-player-overlay {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(15, 23, 42, 0.45), rgba(15, 23, 42, 0.92) 70%);
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 14px;
+      z-index: 25;
+    }
+
+    .film-container.mini-mode .mini-player-overlay {
+      display: flex;
+    }
+
+    /* In the mini-player only the paused picture shows behind the title */
+    .film-container.mini-mode .simulated-notice,
+    .film-container.mini-mode .time-badge,
+    .film-container.mini-mode .moment-pill,
+    .film-container.mini-mode #caption-banner {
+      display: none;
+    }
+
+    .mini-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      overflow: hidden;
+    }
+
+    .mini-badge {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--accent-amber);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .mini-title {
+      font-size: 0.86rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    .mini-resume-btn {
+      background: var(--accent-amber);
+      color: #000;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: var(--radius-full);
+      gap: 6px;
+      min-height: 38px;
+    }
+
+    .mini-resume-btn:hover {
+      background: var(--accent-amber-light);
+    }
+
+    /* Reading Sheet */
+    .sheet-backdrop {
+      position: absolute;
+      /* Starts below the header and mini-player, so the paused film stays in view */
+      inset: 128px 0 0 0;
+      background: rgba(0, 0, 0, 0.55);
+      z-index: 50;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .sheet-backdrop.is-open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .reading-sheet {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--bg-surface);
+      border-radius: 24px 24px 0 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: var(--shadow-elevation);
+      z-index: 60;
+      transform: translateY(100%);
+      transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      max-height: calc(100% - 128px);
+      touch-action: none;
+    }
+
+    .reading-sheet.is-open {
+      transform: translateY(0);
+    }
+
+    .sheet-drag-zone {
+      width: 100%;
+      padding: 12px 0 6px;
+      display: flex;
+      justify-content: center;
+      cursor: grab;
+      touch-action: none;
+    }
+
+    .sheet-drag-handle {
+      width: 40px;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.25);
+      border-radius: var(--radius-full);
+    }
+
+    .sheet-header {
+      padding: 6px 18px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .sheet-title-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sheet-era {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--accent-amber);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .sheet-title {
+      font-size: 1.18rem;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+
+    .sheet-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .sheet-body {
+      padding: 18px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      flex: 1;
+    }
+
+    .fact-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-left: 3px solid var(--accent-amber);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .fact-tag {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--accent-amber-light);
+    }
+
+    .fact-text {
+      font-size: 0.94rem;
+      color: #f1f5f9;
+      line-height: 1.55;
+      font-weight: 500;
+    }
+
+    .fact-graphic {
+      height: 80px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+    }
+
+    .sheet-footer {
+      padding: 14px 18px 18px;
+      background: var(--bg-surface);
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .keep-watching-btn {
+      background: linear-gradient(135deg, var(--accent-amber), #ea580c);
+      color: #000;
+      font-size: 0.95rem;
+      font-weight: 800;
+      padding: 12px 20px;
+      border-radius: var(--radius-full);
+      box-shadow: 0 4px 15px rgba(245, 158, 11, 0.35);
+      gap: 8px;
+      min-height: 48px;
+    }
+
+    .keep-watching-btn:hover {
+      filter: brightness(1.08);
+    }
+
+    .resume-hint {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    /* ==========================================================================
+       SCREEN 3: END SCREEN
+       ========================================================================== */
+    .end-modal {
+      position: absolute;
+      inset: 0;
+      background: rgba(10, 14, 23, 0.96);
+      backdrop-filter: blur(10px);
+      z-index: 70;
+      display: none;
+      flex-direction: column;
+      padding: 24px 20px;
+      overflow-y: auto;
+    }
+
+    .end-modal.is-active {
+      display: flex;
+    }
+
+    .end-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .end-header h2 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .end-header p {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .stats-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .stats-big {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--accent-amber-light);
+    }
+
+    .stats-sub {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+    }
+
+    .end-section-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin: 12px 0 8px;
+    }
+
+    .end-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .end-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: auto;
+      padding-top: 14px;
+    }
+
+    .primary-btn {
+      background: var(--accent-amber);
+      color: #000;
+      font-weight: 700;
+      font-size: 0.92rem;
+      padding: 12px;
+      border-radius: var(--radius-full);
+      min-height: 46px;
+      gap: 8px;
+    }
+
+    .secondary-btn {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-primary);
+      font-weight: 600;
+      font-size: 0.88rem;
+      padding: 12px;
+      border-radius: var(--radius-full);
+      min-height: 46px;
+    }
+
+    .secondary-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(50px);
+      opacity: 0;
+      background: rgba(15, 23, 42, 0.96);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: var(--radius-full);
+      font-size: 0.78rem;
+      font-weight: 600;
+      z-index: 100;
+      pointer-events: none;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+      white-space: nowrap;
+    }
+
+    .toast.is-active {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* ==========================================================================
+       REDUCED MOTION SUPPORT
+       ========================================================================== */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+      }
+      .moment-pill-dot {
+        animation: none;
+      }
+    }
+      /* The phone frame scrolls like a phone: no desktop scrollbars inside it */
+    * { scrollbar-width: none; }
+    *::-webkit-scrollbar { display: none; }
+</style>
+</head>
+<body>
+
+  <!-- Simulated Phone Viewport -->
+  <main class="app-viewport" id="app" role="region" aria-label="City Stories Mobile Prototype">
+
+    <!-- Top App Navigation Bar -->
+    <header class="app-header">
+      <div class="brand-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polygon points="12 8 8 12 12 16 16 12 12 8"></polygon>
+        </svg>
+        <span>City Stories</span>
+        <span class="brand-badge">Demo</span>
+      </div>
+      <button id="header-back-btn" class="control-btn" style="display: none;" aria-label="Return to city picker">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+      </button>
+    </header>
+
+    <!-- ==========================================================================
+         SCREEN 1: CITY PICKER
+         ========================================================================== -->
+    <section id="screen-picker" class="screen is-active" aria-label="Choose a city">
+      <div class="picker-container">
+        <div class="hero-text">
+          <h1>Explore Cities</h1>
+          <p>Continuous documentary storytelling with interactive historical moments you can explore without losing your place.</p>
+        </div>
+
+        <!-- City Card 1: Delhi (Playable) -->
+        <article class="city-card is-playable" id="card-delhi" tabindex="0" role="button" aria-label="Explore Delhi documentary, 5 moments, playable demo">
+          <div class="card-banner">
+            <!-- Inline SVG Illustration for Delhi skyline -->
+            <svg width="100%" height="100%" viewBox="0 0 400 120" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+              <defs>
+                <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#1e1b4b"/>
+                  <stop offset="60%" stop-color="#78350f"/>
+                  <stop offset="100%" stop-color="#d97706"/>
+                </linearGradient>
+              </defs>
+              <rect width="400" height="120" fill="url(#skyGrad)"/>
+              <circle cx="280" cy="80" r="28" fill="#fde68a" opacity="0.3"/>
+              <!-- Silhouette of monuments -->
+              <path d="M0,120 L0,105 Q30,102 60,108 L110,108 L125,50 L130,30 L135,50 L150,108 L220,108 L225,85 Q240,70 255,85 L260,108 L330,108 L340,75 L360,75 L370,108 L400,108 L400,120 Z" fill="#0f172a"/>
+              <!-- Decorative minaret details -->
+              <line x1="126" y1="65" x2="134" y2="65" stroke="#d97706" stroke-width="2"/>
+              <line x1="127" y1="48" x2="133" y2="48" stroke="#d97706" stroke-width="2"/>
+            </svg>
+          </div>
+          <div class="card-content">
+            <div class="card-title-row">
+              <h2 class="card-title">Delhi</h2>
+              <span class="card-tag playable">Playable Demo</span>
+            </div>
+            <p class="card-desc">From 1199 through medieval dynasties to independence. 5 interactive moments in a 60-second documentary.</p>
+            <div class="card-footer">
+              <span>Start documentary (60s)</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
+            </div>
+          </div>
+        </article>
+
+        <!-- City Card 2: Rome (Disabled) -->
+        <article class="city-card is-disabled" aria-label="Rome, Sample: not in this demo" aria-disabled="true">
+          <div class="card-banner">
+            <svg width="100%" height="100%" viewBox="0 0 400 120" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+              <rect width="400" height="120" fill="#1e293b"/>
+              <path d="M40,120 L40,80 Q70,75 100,80 L100,120 M120,120 L120,70 Q160,65 200,70 L200,120" stroke="#475569" stroke-width="3" fill="none"/>
+            </svg>
+          </div>
+          <div class="card-content">
+            <div class="card-title-row">
+              <h2 class="card-title">Rome</h2>
+              <span class="card-tag">Sample: not in this demo</span>
+            </div>
+            <p class="card-desc">The Eternal City: antiquity, empire, and renaissance.</p>
+            <div class="card-footer" style="color: var(--text-muted);">
+              <span>Sample: not in this demo</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- City Card 3: Cairo (Disabled) -->
+        <article class="city-card is-disabled" aria-label="Cairo, Sample: not in this demo" aria-disabled="true">
+          <div class="card-banner">
+            <svg width="100%" height="100%" viewBox="0 0 400 120" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+              <rect width="400" height="120" fill="#1e293b"/>
+              <polygon points="120,120 160,60 200,120" fill="#334155"/>
+              <polygon points="180,120 220,75 260,120" fill="#475569"/>
+            </svg>
+          </div>
+          <div class="card-content">
+            <div class="card-title-row">
+              <h2 class="card-title">Cairo</h2>
+              <span class="card-tag">Sample: not in this demo</span>
+            </div>
+            <p class="card-desc">City of a Thousand Minarets: dynasties of the Nile.</p>
+            <div class="card-footer" style="color: var(--text-muted);">
+              <span>Sample: not in this demo</span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         SCREEN 2: DOCUMENTARY PLAYER & TIMELINE
+         ========================================================================== */
+    -->
+    <section id="screen-player" class="screen" aria-label="Delhi documentary player">
+      <div class="player-view">
+
+        <!-- Simulated Documentary Canvas Container -->
+        <div class="film-container" id="film-box" role="region" aria-label="Simulated documentary video screen. Tap to play or pause.">
+          <canvas id="film-canvas" width="720" height="405"></canvas>
+          <div class="simulated-notice">Simulated documentary · Stands in for real footage</div>
+          <div class="time-badge" id="canvas-time-badge">0:00 / 1:00</div>
+
+          <!-- Moment Pill (Slides in during moment window) -->
+          <div class="moment-pill" id="moment-pill" role="button" tabindex="0" aria-label="Moment reached. Tap to explore without losing your place.">
+            <div class="moment-pill-dot" aria-hidden="true"></div>
+            <span id="pill-text">Qutb Minar · Tap to explore</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </div>
+
+          <!-- Play/Pause visual feedback ripple -->
+          <div class="play-pulse-indicator" id="play-pulse" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" id="play-pulse-icon">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+          </div>
+
+          <!-- Caption overlay at bottom of canvas -->
+          <div class="caption-banner" id="caption-banner" aria-live="polite">
+            Loading documentary...
+          </div>
+
+          <!-- Mini Player Overlay (active when reading sheet is open) -->
+          <div class="mini-player-overlay" id="mini-player-overlay">
+            <div class="mini-info">
+              <span class="mini-badge">Paused · Position Saved</span>
+              <span class="mini-title" id="mini-moment-title">Qutb Minar</span>
+            </div>
+            <button class="mini-resume-btn" id="mini-resume-btn" aria-label="Keep watching and resume film with 3 second recap">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+              </svg>
+              <span>Keep watching</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Controls Bar -->
+        <div class="player-controls">
+          <!-- Scrubber Progress Bar with Moment Dots -->
+          <div class="scrubber-wrapper" id="scrubber-wrapper" role="slider" aria-label="Documentary progress" aria-valuemin="0" aria-valuemax="60" aria-valuenow="0" tabindex="0">
+            <div class="progress-track" id="progress-track">
+              <div class="progress-fill" id="progress-fill"></div>
+              <div class="scrubber-thumb" id="scrubber-thumb"></div>
+
+              <!-- Moment Dots on Progress Bar (calculated dynamically at 6s, 18s, 30s, 42s, 54s) -->
+              <div class="moment-dot" style="left: 10%;" data-index="0" title="0:06 - Qutb Minar" aria-label="Jump to moment 1: Qutb Minar at 0:06"></div>
+              <div class="moment-dot" style="left: 30%;" data-index="1" title="0:18 - Tughlaqabad" aria-label="Jump to moment 2: Tughlaqabad at 0:18"></div>
+              <div class="moment-dot" style="left: 50%;" data-index="2" title="0:30 - Shahjahanabad" aria-label="Jump to moment 3: Shahjahanabad at 0:30"></div>
+              <div class="moment-dot" style="left: 70%;" data-index="3" title="0:42 - 1911 Capital Move" aria-label="Jump to moment 4: 1911 Capital Move at 0:42"></div>
+              <div class="moment-dot" style="left: 90%;" data-index="4" title="0:54 - New Delhi & Independence" aria-label="Jump to moment 5: New Delhi & Independence at 0:54"></div>
+            </div>
+          </div>
+
+          <!-- Buttons Row -->
+          <div class="controls-row">
+            <div class="controls-left">
+              <button class="control-btn" id="play-pause-btn" aria-label="Play documentary">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" id="play-icon" aria-hidden="true">
+                  <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+              </button>
+
+              <button class="control-btn" id="rewind-3s-btn" aria-label="Rewind 3 seconds">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M1 4v6h6M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+                  <text x="12" y="15" font-size="8" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">3</text>
+                </svg>
+              </button>
+
+              <span class="time-readout" id="time-readout">0:00 / 1:00</span>
+            </div>
+
+            <div class="controls-right">
+              <button class="control-btn" id="restart-btn" aria-label="Restart documentary from beginning">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="1 4 1 10 7 10"></polyline>
+                  <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabs Bar -->
+        <div class="tabs-bar" role="tablist">
+          <button class="tab-btn is-active" id="tab-btn-timeline" role="tab" aria-selected="true" aria-controls="tab-content-timeline">
+            <span>Timeline</span>
+            <span class="tab-count">5</span>
+          </button>
+          <button class="tab-btn" id="tab-btn-saved" role="tab" aria-selected="false" aria-controls="tab-content-saved">
+            <span>Your Moments</span>
+            <span class="tab-count" id="saved-count-badge">0</span>
+          </button>
+        </div>
+
+        <!-- Tab Content 1: Timeline -->
+        <div class="tab-content" id="tab-content-timeline" role="tabpanel" aria-labelledby="tab-btn-timeline">
+          <!-- Rendered dynamically by JavaScript -->
+        </div>
+
+        <!-- Tab Content 2: Saved Moments -->
+        <div class="tab-content" id="tab-content-saved" role="tabpanel" aria-labelledby="tab-btn-saved" style="display: none;">
+          <!-- Rendered dynamically by JavaScript -->
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         DIVE IN READING SHEET & BACKDROP
+         ========================================================================== -->
+    <div class="sheet-backdrop" id="sheet-backdrop"></div>
+
+    <aside class="reading-sheet" id="reading-sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-moment-title">
+      <!-- Drag handle for downward swipe gesture -->
+      <div class="sheet-drag-zone" id="sheet-drag-zone" aria-label="Drag down to close and keep watching">
+        <div class="sheet-drag-handle"></div>
+      </div>
+
+      <header class="sheet-header">
+        <div class="sheet-title-group">
+          <span class="sheet-era" id="sheet-moment-era">Era</span>
+          <h2 class="sheet-title" id="sheet-moment-title">Moment Title</h2>
+        </div>
+        <div class="sheet-header-actions">
+          <button class="control-btn" id="sheet-bookmark-btn" aria-label="Save moment for later">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="sheet-bookmark-icon" aria-hidden="true">
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+            </svg>
+          </button>
+          <button class="control-btn" id="sheet-close-btn" aria-label="Close reading sheet and keep watching">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <div class="sheet-body">
+        <div class="fact-card">
+          <span class="fact-tag">Historical Fact</span>
+          <p class="fact-text" id="sheet-fact-text">Historical fact details...</p>
+        </div>
+
+        <div class="fact-graphic" id="sheet-graphic" aria-hidden="true">
+          <!-- Minimal architectural motif -->
+          <svg width="100%" height="60" viewBox="0 0 200 60" preserveAspectRatio="xMidYMid meet">
+            <path d="M20,55 L20,30 Q40,15 60,30 L60,55 M70,55 L70,20 Q100,5 130,20 L130,55 M140,55 L140,30 Q160,15 180,30 L180,55" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.4"/>
+          </svg>
+        </div>
+      </div>
+
+      <footer class="sheet-footer">
+        <button class="keep-watching-btn" id="sheet-keep-watching-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          <span>Keep watching</span>
+        </button>
+        <p class="resume-hint">Rewinds 3 seconds so you do not miss the sentence</p>
+      </footer>
+    </aside>
+
+    <!-- ==========================================================================
+         END SCREEN
+         ========================================================================== -->
+    <div class="end-modal" id="end-modal" role="dialog" aria-modal="true" aria-labelledby="end-title">
+      <div class="end-header">
+        <h2 id="end-title">Documentary Complete</h2>
+        <p>City Stories: Delhi</p>
+      </div>
+
+      <div class="stats-card">
+        <div class="stats-big" id="end-stats-text">You explored 0 of 5 moments</div>
+        <p class="stats-sub">Every moment paused the film and let you dive in without losing your place.</p>
+      </div>
+
+      <div id="end-unexplored-section">
+        <h3 class="end-section-title">Unexplored Moments</h3>
+        <div class="end-list" id="end-unexplored-list"></div>
+      </div>
+
+      <div id="end-saved-section">
+        <h3 class="end-section-title">Your Saved Moments</h3>
+        <div class="end-list" id="end-saved-list"></div>
+      </div>
+
+      <div class="end-actions">
+        <button class="primary-btn" id="end-replay-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="1 4 1 10 7 10"></polyline>
+            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+          </svg>
+          <span>Watch Again</span>
+        </button>
+        <button class="secondary-btn" id="end-cities-btn">
+          <span>Choose Another City</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Floating Feedback Toast -->
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  </main>
+
+  <!-- ==========================================================================
+       JAVASCRIPT: DOCUMENTARY ENGINE & UX INTERACTIONS
+       ========================================================================== -->
+  <script>
+    (function () {
+      'use strict';
+
+      /* ------------------------------------------------------------------------
+         DATA: ONLY HISTORICAL FACTS LISTED IN THE BRIEF
+         ------------------------------------------------------------------------ */
+      const MOMENTS = [
+        {
+          id: 'qutb-minar',
+          title: 'Qutb Minar',
+          era: 'Around 1199',
+          time: 6,
+          pillStart: 3.5,
+          pillEnd: 8.5,
+          fact: 'Construction began around 1199 under Qutb-ud-din Aibak, and it stands in Delhi.',
+          caption: 'Qutb Minar: construction began around 1199 under Qutb-ud-din Aibak, and it stands in Delhi.'
+        },
+        {
+          id: 'tughlaqabad',
+          title: 'Tughlaqabad',
+          era: '1320s',
+          time: 18,
+          pillStart: 15,
+          pillEnd: 20,
+          fact: 'A fort city built in the 1320s under Ghiyas-ud-din Tughlaq.',
+          caption: 'Tughlaqabad: a fort city built in the 1320s under Ghiyas-ud-din Tughlaq.'
+        },
+        {
+          id: 'shahjahanabad',
+          title: 'Shahjahanabad',
+          era: '1648',
+          time: 30,
+          pillStart: 27,
+          pillEnd: 32,
+          fact: 'Shah Jahan built this new city and the Red Fort, finished in 1648, when the Mughal capital moved to Delhi.',
+          caption: 'Shahjahanabad: Shah Jahan built this new city and the Red Fort, finished in 1648, when the Mughal capital moved to Delhi.'
+        },
+        {
+          id: 'capital-1911',
+          title: '1911 Capital Move',
+          era: '1911',
+          time: 42,
+          pillStart: 39,
+          pillEnd: 44,
+          fact: 'The British announced that India’s capital would move from Calcutta to Delhi.',
+          caption: '1911: the British announced that India’s capital would move from Calcutta to Delhi.'
+        },
+        {
+          id: 'new-delhi-1947',
+          title: 'New Delhi & Independence',
+          era: '1931 & 1947',
+          time: 54,
+          pillStart: 50,
+          pillEnd: 56,
+          fact: 'New Delhi: inaugurated as the capital in 1931. On 15 August 1947 India became independent, and the flag was raised at the Red Fort the next day.',
+          caption: 'New Delhi: inaugurated as the capital in 1931. On 15 August 1947 India became independent, and the flag was raised at the Red Fort the next day.'
+        }
+      ];
+
+      const TOTAL_DURATION = 60; // 60 seconds simulated documentary
+
+      /* ------------------------------------------------------------------------
+         STATE
+         ------------------------------------------------------------------------ */
+      const state = {
+        currentTime: 0,
+        isPlaying: false,
+        activeMomentIndex: -1,
+        activeSheetMoment: null,
+        isSheetOpen: false,
+        isEndScreenOpen: false,
+        savedMoments: new Set(),
+        exploredMoments: new Set(),
+        activeTab: 'timeline',
+        reducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      };
+
+      /* ------------------------------------------------------------------------
+         DOM ELEMENTS
+         ------------------------------------------------------------------------ */
+      const screenPicker = document.getElementById('screen-picker');
+      const screenPlayer = document.getElementById('screen-player');
+      const headerBackBtn = document.getElementById('header-back-btn');
+      const cardDelhi = document.getElementById('card-delhi');
+
+      const filmBox = document.getElementById('film-box');
+      const canvas = document.getElementById('film-canvas');
+      const ctx = canvas.getContext('2d');
+      const canvasTimeBadge = document.getElementById('canvas-time-badge');
+      const momentPill = document.getElementById('moment-pill');
+      const pillText = document.getElementById('pill-text');
+      const captionBanner = document.getElementById('caption-banner');
+      const playPulse = document.getElementById('play-pulse');
+      const playPulseIcon = document.getElementById('play-pulse-icon');
+
+      const miniOverlay = document.getElementById('mini-player-overlay');
+      const miniMomentTitle = document.getElementById('mini-moment-title');
+      const miniResumeBtn = document.getElementById('mini-resume-btn');
+
+      const scrubberWrapper = document.getElementById('scrubber-wrapper');
+      const progressTrack = document.getElementById('progress-track');
+      const progressFill = document.getElementById('progress-fill');
+      const scrubberThumb = document.getElementById('scrubber-thumb');
+      const playPauseBtn = document.getElementById('play-pause-btn');
+      const playIcon = document.getElementById('play-icon');
+      const rewind3sBtn = document.getElementById('rewind-3s-btn');
+      const restartBtn = document.getElementById('restart-btn');
+      const timeReadout = document.getElementById('time-readout');
+
+      const tabBtnTimeline = document.getElementById('tab-btn-timeline');
+      const tabBtnSaved = document.getElementById('tab-btn-saved');
+      const tabContentTimeline = document.getElementById('tab-content-timeline');
+      const tabContentSaved = document.getElementById('tab-content-saved');
+      const savedCountBadge = document.getElementById('saved-count-badge');
+
+      const sheetBackdrop = document.getElementById('sheet-backdrop');
+      const readingSheet = document.getElementById('reading-sheet');
+      const sheetDragZone = document.getElementById('sheet-drag-zone');
+      const sheetMomentEra = document.getElementById('sheet-moment-era');
+      const sheetMomentTitle = document.getElementById('sheet-moment-title');
+      const sheetFactText = document.getElementById('sheet-fact-text');
+      const sheetBookmarkBtn = document.getElementById('sheet-bookmark-btn');
+      const sheetBookmarkIcon = document.getElementById('sheet-bookmark-icon');
+      const sheetCloseBtn = document.getElementById('sheet-close-btn');
+      const sheetKeepWatchingBtn = document.getElementById('sheet-keep-watching-btn');
+
+      const endModal = document.getElementById('end-modal');
+      const endStatsText = document.getElementById('end-stats-text');
+      const endUnexploredList = document.getElementById('end-unexplored-list');
+      const endSavedList = document.getElementById('end-saved-list');
+      const endReplayBtn = document.getElementById('end-replay-btn');
+      const endCitiesBtn = document.getElementById('end-cities-btn');
+      const toast = document.getElementById('toast');
+
+      let toastTimeout = null;
+      let lastFrameTimestamp = 0;
+      let animationFrameId = null;
+
+      /* ------------------------------------------------------------------------
+         CANVAS DOCUMENTARY SCENE RENDERING
+         Pure 2D canvas drawing - no outside images, calm artistic animations
+         ------------------------------------------------------------------------ */
+      function renderFilmFrame(time) {
+        const w = canvas.width;
+        const h = canvas.height;
+        ctx.clearRect(0, 0, w, h);
+
+        // Determine active era scene based on time (5 eras across 60 seconds)
+        // 0-12s: Qutb Minar, 12-24s: Tughlaqabad, 24-36s: Shahjahanabad, 36-48s: 1911, 48-60s: New Delhi & Independence
+        const sceneIndex = Math.min(4, Math.floor(time / 12));
+        const sceneProgress = (time % 12) / 12; // 0.0 to 1.0 within era
+
+        // Draw active scene
+        switch (sceneIndex) {
+          case 0:
+            drawSceneQutbMinar(w, h, sceneProgress, time);
+            break;
+          case 1:
+            drawSceneTughlaqabad(w, h, sceneProgress, time);
+            break;
+          case 2:
+            drawSceneShahjahanabad(w, h, sceneProgress, time);
+            break;
+          case 3:
+            drawScene1911(w, h, sceneProgress, time);
+            break;
+          case 4:
+            drawSceneNewDelhi(w, h, sceneProgress, time);
+            break;
+        }
+
+        // Film grain / subtle vignette overlay
+        const vigGrad = ctx.createRadialGradient(w / 2, h / 2, h * 0.45, w / 2, h / 2, h * 0.85);
+        vigGrad.addColorStop(0, 'rgba(0,0,0,0)');
+        vigGrad.addColorStop(1, 'rgba(0,0,0,0.65)');
+        ctx.fillStyle = vigGrad;
+        ctx.fillRect(0, 0, w, h);
+
+        // Subtle scene watermark in upper right
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.font = '600 13px ' + getComputedStyle(document.body).fontFamily;
+        ctx.textAlign = 'right';
+        ctx.fillText(MOMENTS[sceneIndex].era, w - 20, 32);
+      }
+
+      /* Scene 1: Qutb Minar (0 - 12s) */
+      function drawSceneQutbMinar(w, h, progress, t) {
+        // Warm sunset sky
+        const sky = ctx.createLinearGradient(0, 0, 0, h);
+        sky.addColorStop(0, '#1c1917');
+        sky.addColorStop(0.4, '#7c2d12');
+        sky.addColorStop(0.75, '#c2410c');
+        sky.addColorStop(1, '#fde047');
+        ctx.fillStyle = sky;
+        ctx.fillRect(0, 0, w, h);
+
+        // Sun disc
+        const sunX = w * 0.72;
+        const sunY = h * 0.48;
+        const sunGrad = ctx.createRadialGradient(sunX, sunY, 5, sunX, sunY, 65);
+        sunGrad.addColorStop(0, 'rgba(254, 240, 138, 0.9)');
+        sunGrad.addColorStop(0.5, 'rgba(249, 115, 22, 0.4)');
+        sunGrad.addColorStop(1, 'rgba(249, 115, 22, 0)');
+        ctx.fillStyle = sunGrad;
+        ctx.beginPath();
+        ctx.arc(sunX, sunY, 65, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Slow camera drift
+        const panX = state.reducedMotion ? 0 : Math.sin(t * 0.2) * 8;
+
+        // Sandstone ridge
+        ctx.fillStyle = '#292524';
+        ctx.beginPath();
+        ctx.moveTo(0, h);
+        ctx.lineTo(0, h * 0.78);
+        ctx.quadraticCurveTo(w * 0.3, h * 0.72, w * 0.6, h * 0.8);
+        ctx.quadraticCurveTo(w * 0.85, h * 0.85, w, h * 0.76);
+        ctx.lineTo(w, h);
+        ctx.fill();
+
+        // Qutb Minar silhouette
+        const towerX = w * 0.35 + panX;
+        const baseW = 38;
+        const topW = 16;
+        const towerH = 220;
+        const towerBaseY = h * 0.85;
+
+        ctx.fillStyle = '#1c1917';
+        ctx.beginPath();
+        ctx.moveTo(towerX - baseW / 2, towerBaseY);
+        ctx.lineTo(towerX - topW / 2, towerBaseY - towerH);
+        ctx.lineTo(towerX + topW / 2, towerBaseY - towerH);
+        ctx.lineTo(towerX + baseW / 2, towerBaseY);
+        ctx.closePath();
+        ctx.fill();
+
+        // Minaret balconies
+        ctx.strokeStyle = '#d97706';
+        ctx.lineWidth = 3;
+        [0.28, 0.52, 0.72, 0.88].forEach(pct => {
+          const y = towerBaseY - towerH * pct;
+          const currW = baseW - (baseW - topW) * pct;
+          ctx.beginPath();
+          ctx.moveTo(towerX - currW / 2 - 4, y);
+          ctx.lineTo(towerX + currW / 2 + 4, y);
+          ctx.stroke();
+        });
+
+        // Birds drifting across sky
+        if (!state.reducedMotion) {
+          ctx.strokeStyle = '#44403c';
+          ctx.lineWidth = 2;
+          for (let i = 0; i < 3; i++) {
+            const bx = ((w * 0.5 + i * 45 + t * 12) % (w + 100)) - 50;
+            const by = h * 0.25 + i * 18 + Math.sin(t + i) * 6;
+            ctx.beginPath();
+            ctx.moveTo(bx - 8, by);
+            ctx.quadraticCurveTo(bx - 4, by - 5, bx, by);
+            ctx.quadraticCurveTo(bx + 4, by - 5, bx + 8, by);
+            ctx.stroke();
+          }
+        }
+      }
+
+      /* Scene 2: Tughlaqabad Fort (12 - 24s) */
+      function drawSceneTughlaqabad(w, h, progress, t) {
+        // Deep twilight sky
+        const sky = ctx.createLinearGradient(0, 0, 0, h);
+        sky.addColorStop(0, '#090d16');
+        sky.addColorStop(0.5, '#1e1b4b');
+        sky.addColorStop(1, '#3730a3');
+        ctx.fillStyle = sky;
+        ctx.fillRect(0, 0, w, h);
+
+        // Stars
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+        const starCoords = [[0.15, 0.12], [0.35, 0.22], [0.55, 0.1], [0.78, 0.18], [0.88, 0.08]];
+        starCoords.forEach(([sx, sy]) => {
+          ctx.fillRect(w * sx, h * sy, 2, 2);
+        });
+
+        // Cyclopean stone fort walls and bastions
+        const drift = state.reducedMotion ? 0 : Math.sin(t * 0.15) * 6;
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.moveTo(0, h);
+        ctx.lineTo(0, h * 0.65);
+        // Sloping fortress rampart
+        ctx.lineTo(w * 0.25, h * 0.6);
+        // Semi-circular bastion 1
+        ctx.arc(w * 0.35 + drift, h * 0.6, 35, Math.PI, 0, false);
+        ctx.lineTo(w * 0.65 + drift, h * 0.6);
+        // Fortress gateway
+        ctx.lineTo(w * 0.72 + drift, h * 0.52);
+        ctx.lineTo(w * 0.8 + drift, h * 0.52);
+        // Bastion 2
+        ctx.arc(w * 0.88 + drift, h * 0.62, 30, Math.PI, 0, false);
+        ctx.lineTo(w, h * 0.68);
+        ctx.lineTo(w, h);
+        ctx.fill();
+
+        // Parapet battlements (crenellations)
+        ctx.fillStyle = '#020617';
+        for (let x = w * 0.1; x < w * 0.85; x += 18) {
+          ctx.fillRect(x + drift, h * 0.57, 10, 8);
+        }
+
+        // Warm torch glow in fort portal
+        const portalX = w * 0.76 + drift;
+        const torch = ctx.createRadialGradient(portalX, h * 0.68, 2, portalX, h * 0.68, 40);
+        torch.addColorStop(0, 'rgba(251, 191, 36, 0.8)');
+        torch.addColorStop(0.6, 'rgba(245, 158, 11, 0.2)');
+        torch.addColorStop(1, 'rgba(245, 158, 11, 0)');
+        ctx.fillStyle = torch;
+        ctx.beginPath();
+        ctx.arc(portalX, h * 0.68, 40, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      /* Scene 3: Shahjahanabad & Red Fort (24 - 36s) */
+      function drawSceneShahjahanabad(w, h, progress, t) {
+        // Midnight crimson dusk
+        const sky = ctx.createLinearGradient(0, 0, 0, h);
+        sky.addColorStop(0, '#09090b');
+        sky.addColorStop(0.5, '#4c0519');
+        sky.addColorStop(1, '#881337');
+        ctx.fillStyle = sky;
+        ctx.fillRect(0, 0, w, h);
+
+        // Crescent moon
+        ctx.fillStyle = '#fef08a';
+        ctx.beginPath();
+        ctx.arc(w * 0.82, h * 0.22, 16, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = sky;
+        ctx.beginPath();
+        ctx.arc(w * 0.80, h * 0.20, 15, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Red Fort sandstone ramparts
+        const pan = state.reducedMotion ? 0 : Math.cos(t * 0.15) * 8;
+        ctx.fillStyle = '#450a0a';
+        ctx.beginPath();
+        ctx.moveTo(0, h * 0.75);
+        ctx.lineTo(w * 0.2 + pan, h * 0.75);
+        // Central grand Lahori Gate structure
+        ctx.lineTo(w * 0.25 + pan, h * 0.45);
+        ctx.lineTo(w * 0.55 + pan, h * 0.45);
+        ctx.lineTo(w * 0.6 + pan, h * 0.75);
+        ctx.lineTo(w, h * 0.75);
+        ctx.lineTo(w, h);
+        ctx.lineTo(0, h);
+        ctx.fill();
+
+        // Marble domed pavilions (chhatris)
+        ctx.fillStyle = '#f1f5f9';
+        [w * 0.28 + pan, w * 0.52 + pan].forEach(cx => {
+          // Dome
+          ctx.beginPath();
+          ctx.arc(cx, h * 0.41, 10, Math.PI, 0);
+          ctx.fill();
+          // Finial
+          ctx.fillRect(cx - 1, h * 0.36, 2, 6);
+        });
+
+        // Water reflection (river at the foot of the fort)
+        const water = ctx.createLinearGradient(0, h * 0.8, 0, h);
+        water.addColorStop(0, '#1c1917');
+        water.addColorStop(1, '#09090b');
+        ctx.fillStyle = water;
+        ctx.fillRect(0, h * 0.8, w, h * 0.2);
+
+        // Soft ripple lines
+        ctx.strokeStyle = 'rgba(251, 113, 133, 0.2)';
+        ctx.lineWidth = 1.5;
+        for (let i = 0; i < 4; i++) {
+          const y = h * 0.84 + i * 10;
+          ctx.beginPath();
+          ctx.moveTo(w * 0.1, y);
+          ctx.lineTo(w * 0.9, y);
+          ctx.stroke();
+        }
+      }
+
+      /* Scene 4: 1911 Capital Announcement (36 - 48s) */
+      function drawScene1911(w, h, progress, t) {
+        // Morning architectural amber haze
+        const sky = ctx.createLinearGradient(0, 0, 0, h);
+        sky.addColorStop(0, '#1e293b');
+        sky.addColorStop(0.4, '#78350f');
+        sky.addColorStop(0.8, '#d97706');
+        sky.addColorStop(1, '#fef3c7');
+        ctx.fillStyle = sky;
+        ctx.fillRect(0, 0, w, h);
+
+        // Volumetric morning rays
+        ctx.fillStyle = 'rgba(254, 243, 199, 0.08)';
+        for (let i = -2; i <= 3; i++) {
+          ctx.beginPath();
+          ctx.moveTo(w * 0.5, 0);
+          ctx.lineTo(w * 0.5 + i * 120, h);
+          ctx.lineTo(w * 0.5 + i * 120 + 60, h);
+          ctx.closePath();
+          ctx.fill();
+        }
+
+        // Colonnade and grand classical avenue
+        const pan = state.reducedMotion ? 0 : Math.sin(t * 0.15) * 6;
+        ctx.fillStyle = '#1e1b4b';
+
+        // Avenue trees lining perspective
+        for (let i = 0; i < 6; i++) {
+          const treeX1 = w * 0.15 - i * 18 + pan;
+          const treeX2 = w * 0.85 + i * 18 + pan;
+          const treeY = h * 0.65 + i * 14;
+          const radius = 18 + i * 4;
+          ctx.beginPath();
+          ctx.arc(treeX1, treeY, radius, 0, Math.PI * 2);
+          ctx.arc(treeX2, treeY, radius, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Distant grand dome arch silhouette
+        ctx.beginPath();
+        ctx.arc(w * 0.5 + pan, h * 0.55, 36, Math.PI, 0);
+        ctx.fillRect(w * 0.44 + pan, h * 0.55, w * 0.12, h * 0.25);
+        ctx.fill();
+
+        // Ground roadway
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.moveTo(w * 0.42 + pan, h * 0.75);
+        ctx.lineTo(w * 0.58 + pan, h * 0.75);
+        ctx.lineTo(w, h);
+        ctx.lineTo(0, h);
+        ctx.fill();
+      }
+
+      /* Scene 5: New Delhi & Independence (48 - 60s) */
+      function drawSceneNewDelhi(w, h, progress, t) {
+        // Dawn transitioning to daylight with subtle tricolor aura
+        const sky = ctx.createLinearGradient(0, 0, 0, h);
+        sky.addColorStop(0, '#0f172a');
+        sky.addColorStop(0.35, '#c2410c'); // Saffron aura
+        sky.addColorStop(0.7, '#fef08a');  // White/gold aura
+        sky.addColorStop(1, '#15803d');    // Verdant horizon
+        ctx.fillStyle = sky;
+        ctx.fillRect(0, 0, w, h);
+
+        const pan = state.reducedMotion ? 0 : Math.sin(t * 0.12) * 5;
+
+        // India Gate monument arch silhouette
+        const gateX = w * 0.5 + pan;
+        const gateW = 96;
+        const gateH = 120;
+        const gateBaseY = h * 0.82;
+
+        ctx.fillStyle = '#18181b';
+        // Main block
+        ctx.fillRect(gateX - gateW / 2, gateBaseY - gateH, gateW, gateH);
+        // Stepped attic top
+        ctx.fillRect(gateX - gateW * 0.4, gateBaseY - gateH - 14, gateW * 0.8, 14);
+
+        // Center cutout archway
+        ctx.fillStyle = sky;
+        ctx.beginPath();
+        ctx.arc(gateX, gateBaseY - 60, 24, Math.PI, 0);
+        ctx.lineTo(gateX + 24, gateBaseY);
+        ctx.lineTo(gateX - 24, gateBaseY);
+        ctx.closePath();
+        ctx.fill();
+
+        // Flag mast atop ramparts with fluttering silhouette
+        const mastX = w * 0.78 + pan;
+        ctx.strokeStyle = '#f8fafc';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(mastX, gateBaseY);
+        ctx.lineTo(mastX, gateBaseY - 95);
+        ctx.stroke();
+
+        // Fluttering flag banner
+        const wave = state.reducedMotion ? 0 : Math.sin(t * 5) * 4;
+        ctx.fillStyle = '#f97316';
+        ctx.beginPath();
+        ctx.moveTo(mastX, gateBaseY - 95);
+        ctx.lineTo(mastX + 22, gateBaseY - 90 + wave);
+        ctx.lineTo(mastX + 22, gateBaseY - 76 + wave);
+        ctx.lineTo(mastX, gateBaseY - 80);
+        ctx.closePath();
+        ctx.fill();
+
+        // Boulevard
+        ctx.fillStyle = '#09090b';
+        ctx.beginPath();
+        ctx.moveTo(0, h * 0.88);
+        ctx.lineTo(w, h * 0.88);
+        ctx.lineTo(w, h);
+        ctx.lineTo(0, h);
+        ctx.fill();
+      }
+
+      /* ------------------------------------------------------------------------
+         PLAYBACK LOOP
+         ------------------------------------------------------------------------ */
+      function updatePlayback(timestamp) {
+        if (!lastFrameTimestamp) lastFrameTimestamp = timestamp;
+        const delta = (timestamp - lastFrameTimestamp) / 1000;
+        lastFrameTimestamp = timestamp;
+
+        if (state.isPlaying && !state.isSheetOpen && !state.isEndScreenOpen) {
+          state.currentTime += delta;
+          if (state.currentTime >= TOTAL_DURATION) {
+            state.currentTime = TOTAL_DURATION;
+            pauseFilm();
+            showEndScreen();
+          }
+        }
+
+        renderFilmFrame(state.currentTime);
+        updateUI();
+
+        animationFrameId = requestAnimationFrame(updatePlayback);
+      }
+
+      /* ------------------------------------------------------------------------
+         UI UPDATES
+         ------------------------------------------------------------------------ */
+      function updateUI() {
+        const t = Math.min(TOTAL_DURATION, Math.max(0, state.currentTime));
+        const pct = (t / TOTAL_DURATION) * 100;
+
+        // Scrubber update
+        progressFill.style.width = pct + '%';
+        scrubberThumb.style.left = pct + '%';
+        scrubberWrapper.setAttribute('aria-valuenow', Math.floor(t));
+
+        // Time readouts
+        const currentFmt = formatTime(t);
+        const totalFmt = formatTime(TOTAL_DURATION);
+        timeReadout.textContent = `${currentFmt} / ${totalFmt}`;
+        canvasTimeBadge.textContent = `${currentFmt} / ${totalFmt}`;
+
+        // Play/Pause icon
+        if (state.isPlaying) {
+          playIcon.innerHTML = '<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>';
+          playPauseBtn.setAttribute('aria-label', 'Pause documentary');
+        } else {
+          playIcon.innerHTML = '<polygon points="5 3 19 12 5 21 5 3"></polygon>';
+          playPauseBtn.setAttribute('aria-label', 'Play documentary');
+        }
+
+        // Caption update: find active moment
+        let currentMoment = MOMENTS[0];
+        let activePillMoment = null;
+
+        MOMENTS.forEach((m, idx) => {
+          if (t >= m.pillStart && t <= m.pillEnd) {
+            activePillMoment = m;
+          }
+          if (t >= (idx * 12)) {
+            currentMoment = m;
+          }
+        });
+
+        captionBanner.textContent = currentMoment.caption;
+
+        // Moment Pill trigger
+        if (activePillMoment && !state.isSheetOpen && !state.isEndScreenOpen) {
+          pillText.textContent = `${activePillMoment.title} · Tap to explore`;
+          momentPill.classList.add('is-visible');
+          state.activeMomentIndex = MOMENTS.indexOf(activePillMoment);
+        } else {
+          momentPill.classList.remove('is-visible');
+        }
+
+        // Update moment dots on scrubber
+        const dots = document.querySelectorAll('.moment-dot');
+        dots.forEach((dot, idx) => {
+          if (state.exploredMoments.has(MOMENTS[idx].id)) {
+            dot.classList.add('explored');
+          } else {
+            dot.classList.remove('explored');
+          }
+        });
+      }
+
+      function formatTime(sec) {
+        const m = Math.floor(sec / 60);
+        const s = Math.floor(sec % 60);
+        return `${m}:${s < 10 ? '0' : ''}${s}`;
+      }
+
+      /* ------------------------------------------------------------------------
+         PLAY / PAUSE & NAVIGATION
+         ------------------------------------------------------------------------ */
+      function playFilm() {
+        if (state.currentTime >= TOTAL_DURATION) {
+          state.currentTime = 0;
+        }
+        state.isPlaying = true;
+        showPlayPulse(true);
+      }
+
+      function pauseFilm() {
+        state.isPlaying = false;
+        showPlayPulse(false);
+      }
+
+      function togglePlayPause() {
+        if (state.isPlaying) {
+          pauseFilm();
+        } else {
+          playFilm();
+        }
+      }
+
+      function showPlayPulse(isPlaying) {
+        playPulseIcon.innerHTML = isPlaying 
+          ? '<polygon points="5 3 19 12 5 21 5 3"></polygon>'
+          : '<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>';
+        playPulse.classList.add('animate');
+        setTimeout(() => playPulse.classList.remove('animate'), 350);
+      }
+
+      function seekTo(targetTime) {
+        state.currentTime = Math.max(0, Math.min(TOTAL_DURATION, targetTime));
+        renderFilmFrame(state.currentTime);
+        updateUI();
+      }
+
+      /* ------------------------------------------------------------------------
+         DIVE IN WITHOUT LOSING YOUR PLACE (READING SHEET)
+         Tapping a moment pauses film, shrinks to mini-player pinned at top,
+         and slides up reading sheet.
+         ------------------------------------------------------------------------ */
+      function openMomentSheet(moment) {
+        state.activeSheetMoment = moment;
+        state.exploredMoments.add(moment.id);
+
+        // 1. Pause film
+        pauseFilm();
+
+        // 2. Shrink player to mini-player pinned at top
+        filmBox.classList.add('mini-mode');
+        miniMomentTitle.textContent = moment.title;
+
+        // 3. Populate sheet content with EXACT specified historical fact
+        sheetMomentEra.textContent = moment.era;
+        sheetMomentTitle.textContent = moment.title;
+        sheetFactText.textContent = moment.fact;
+        updateSheetBookmarkState();
+
+        // 4. Slide up reading sheet
+        sheetBackdrop.classList.add('is-open');
+        readingSheet.classList.add('is-open');
+        state.isSheetOpen = true;
+
+        renderTimelineList();
+        renderSavedList();
+      }
+
+      /* ------------------------------------------------------------------------
+         RESUME WITH A RECAP
+         Keep watching restores the player and rewinds 3 seconds so the sentence
+         is not lost.
+         ------------------------------------------------------------------------ */
+      function resumeAndCloseSheet() {
+        if (!state.isSheetOpen) return;
+
+        // Close sheet
+        readingSheet.classList.remove('is-open');
+        sheetBackdrop.classList.remove('is-open');
+        filmBox.classList.remove('mini-mode');
+        state.isSheetOpen = false;
+
+        // Rewind 3 seconds so sentence isn't lost
+        const rewoundTime = Math.max(0, state.currentTime - 3);
+        seekTo(rewoundTime);
+
+        // Resume playback
+        playFilm();
+
+        showToast('Rewound 3s · Resuming documentary');
+      }
+
+      /* ------------------------------------------------------------------------
+         BOOKMARKS / SAVE FOR LATER
+         ------------------------------------------------------------------------ */
+      function toggleBookmark(momentId) {
+        if (state.savedMoments.has(momentId)) {
+          state.savedMoments.delete(momentId);
+          showToast('Removed from your moments');
+        } else {
+          state.savedMoments.add(momentId);
+          showToast('Saved to your moments');
+        }
+        updateSheetBookmarkState();
+        renderTimelineList();
+        renderSavedList();
+        savedCountBadge.textContent = state.savedMoments.size;
+      }
+
+      function updateSheetBookmarkState() {
+        if (!state.activeSheetMoment) return;
+        const isSaved = state.savedMoments.has(state.activeSheetMoment.id);
+        sheetBookmarkBtn.setAttribute('aria-label', isSaved ? 'Remove bookmark' : 'Save moment for later');
+        sheetBookmarkBtn.classList.toggle('is-active', isSaved);
+        sheetBookmarkIcon.setAttribute('fill', isSaved ? 'currentColor' : 'none');
+      }
+
+      /* ------------------------------------------------------------------------
+         TIMELINE & SAVED LIST RENDERING
+         ------------------------------------------------------------------------ */
+      function renderTimelineList() {
+        tabContentTimeline.innerHTML = '';
+        MOMENTS.forEach((m, idx) => {
+          const isExplored = state.exploredMoments.has(m.id);
+          const isSaved = state.savedMoments.has(m.id);
+
+          const card = document.createElement('div');
+          card.className = 'timeline-card';
+          card.innerHTML = `
+            <div class="timeline-card-header">
+              <div class="timeline-badge-group">
+                <span class="timeline-time">${formatTime(m.time)}</span>
+                <span class="timeline-status ${isExplored ? 'explored' : ''}">
+                  ${isExplored ? '✓ Explored' : 'Unexplored'}
+                </span>
+              </div>
+              <button class="control-btn bookmark-toggle-btn" data-id="${m.id}" aria-label="${isSaved ? 'Remove from saved' : 'Save moment'}">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="${isSaved ? 'var(--accent-amber)' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                </svg>
+              </button>
+            </div>
+            <h4 class="timeline-title">${m.title}</h4>
+            <p class="timeline-fact">${m.fact}</p>
+            <div class="timeline-actions">
+              <button class="jump-btn" data-time="${m.time}" aria-label="Jump film to ${m.title} at ${formatTime(m.time)}">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+                <span>Jump to scene</span>
+              </button>
+              <button class="jump-btn explore-direct-btn" data-index="${idx}" style="color: var(--accent-amber-light);" aria-label="Explore ${m.title}">
+                <span>Explore moment →</span>
+              </button>
+            </div>
+          `;
+          tabContentTimeline.appendChild(card);
+        });
+
+        // Attach event listeners to buttons
+        tabContentTimeline.querySelectorAll('.bookmark-toggle-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleBookmark(btn.dataset.id);
+          });
+        });
+
+        tabContentTimeline.querySelectorAll('.jump-btn[data-time]').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            seekTo(parseFloat(btn.dataset.time));
+            playFilm();
+          });
+        });
+
+        tabContentTimeline.querySelectorAll('.explore-direct-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const idx = parseInt(btn.dataset.index, 10);
+            seekTo(MOMENTS[idx].time);
+            openMomentSheet(MOMENTS[idx]);
+          });
+        });
+      }
+
+      function renderSavedList() {
+        tabContentSaved.innerHTML = '';
+        if (state.savedMoments.size === 0) {
+          tabContentSaved.innerHTML = `
+            <div class="empty-state">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+              </svg>
+              <p>No saved moments yet. Tap the bookmark icon during the film or in the timeline to save moments for later review.</p>
+            </div>
+          `;
+          return;
+        }
+
+        MOMENTS.filter(m => state.savedMoments.has(m.id)).forEach(m => {
+          const card = document.createElement('div');
+          card.className = 'timeline-card';
+          card.innerHTML = `
+            <div class="timeline-card-header">
+              <span class="timeline-time">${formatTime(m.time)}</span>
+              <button class="control-btn bookmark-remove-btn" data-id="${m.id}" aria-label="Remove ${m.title} from saved">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--accent-amber)" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                </svg>
+              </button>
+            </div>
+            <h4 class="timeline-title">${m.title}</h4>
+            <p class="timeline-fact">${m.fact}</p>
+            <div class="timeline-actions">
+              <button class="jump-btn saved-jump-btn" data-time="${m.time}">
+                <span>Jump to scene</span>
+              </button>
+              <button class="jump-btn saved-open-btn" data-id="${m.id}" style="color: var(--accent-amber-light);">
+                <span>Read details →</span>
+              </button>
+            </div>
+          `;
+          tabContentSaved.appendChild(card);
+        });
+
+        tabContentSaved.querySelectorAll('.bookmark-remove-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleBookmark(btn.dataset.id);
+          });
+        });
+
+        tabContentSaved.querySelectorAll('.saved-jump-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            seekTo(parseFloat(btn.dataset.time));
+            playFilm();
+          });
+        });
+
+        tabContentSaved.querySelectorAll('.saved-open-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const moment = MOMENTS.find(m => m.id === btn.dataset.id);
+            if (moment) openMomentSheet(moment);
+          });
+        });
+      }
+
+      /* ------------------------------------------------------------------------
+         END SCREEN
+         Shows: "You explored X of 5 moments", the unexplored ones, and saved ones.
+         ------------------------------------------------------------------------ */
+      function showEndScreen() {
+        state.isEndScreenOpen = true;
+        const exploredCount = state.exploredMoments.size;
+        endStatsText.textContent = `You explored ${exploredCount} of ${MOMENTS.length} moments`;
+
+        // Render unexplored
+        endUnexploredList.innerHTML = '';
+        const unexplored = MOMENTS.filter(m => !state.exploredMoments.has(m.id));
+        if (unexplored.length === 0) {
+          endUnexploredList.innerHTML = '<p style="font-size: 0.82rem; color: #34d399;">You explored all 5 moments in this documentary!</p>';
+        } else {
+          unexplored.forEach(m => {
+            const row = document.createElement('div');
+            row.className = 'timeline-card';
+            row.style.padding = '10px 14px';
+            row.innerHTML = `
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <strong style="font-size: 0.88rem;">${m.title}</strong>
+                  <div style="font-size: 0.74rem; color: var(--text-muted);">${m.era}</div>
+                </div>
+                <button class="jump-btn end-explore-btn" data-id="${m.id}" style="color: var(--accent-amber);">Explore →</button>
+              </div>
+            `;
+            endUnexploredList.appendChild(row);
+          });
+        }
+
+        // Render saved
+        endSavedList.innerHTML = '';
+        const saved = MOMENTS.filter(m => state.savedMoments.has(m.id));
+        if (saved.length === 0) {
+          endSavedList.innerHTML = '<p style="font-size: 0.82rem; color: var(--text-muted);">No moments saved to your list.</p>';
+        } else {
+          saved.forEach(m => {
+            const row = document.createElement('div');
+            row.className = 'timeline-card';
+            row.style.padding = '10px 14px';
+            row.innerHTML = `
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <strong style="font-size: 0.88rem;">${m.title}</strong>
+                <span style="font-size: 0.74rem; color: var(--accent-amber-light);">${formatTime(m.time)}</span>
+              </div>
+            `;
+            endSavedList.appendChild(row);
+          });
+        }
+
+        // Attach unexplored click handler
+        endUnexploredList.querySelectorAll('.end-explore-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const m = MOMENTS.find(item => item.id === btn.dataset.id);
+            if (m) {
+              endModal.classList.remove('is-active');
+              state.isEndScreenOpen = false;
+              seekTo(m.time);
+              openMomentSheet(m);
+            }
+          });
+        });
+
+        endModal.classList.add('is-active');
+      }
+
+      function hideEndScreen() {
+        endModal.classList.remove('is-active');
+        state.isEndScreenOpen = false;
+      }
+
+      /* ------------------------------------------------------------------------
+         TOAST FEEDBACK HELPER
+         ------------------------------------------------------------------------ */
+      function showToast(msg) {
+        if (toastTimeout) clearTimeout(toastTimeout);
+        toast.textContent = msg;
+        toast.classList.add('is-active');
+        toastTimeout = setTimeout(() => {
+          toast.classList.remove('is-active');
+        }, 2200);
+      }
+
+      /* ------------------------------------------------------------------------
+         GESTURE & SWIPE DOWN HANDLERS
+         Swipe sheet down to close and resume with recap
+         ------------------------------------------------------------------------ */
+      let touchStartY = 0;
+      let touchCurrentY = 0;
+      let isDraggingSheet = false;
+
+      function onPointerDown(e) {
+        touchStartY = e.clientY || (e.touches && e.touches[0].clientY) || 0;
+        touchCurrentY = touchStartY;
+        isDraggingSheet = true;
+        readingSheet.style.transition = 'none';
+      }
+
+      function onPointerMove(e) {
+        if (!isDraggingSheet) return;
+        const currentY = e.clientY || (e.touches && e.touches[0].clientY) || 0;
+        const deltaY = currentY - touchStartY;
+        if (deltaY > 0) {
+          readingSheet.style.transform = `translateY(${deltaY}px)`;
+        }
+      }
+
+      function onPointerUp(e) {
+        if (!isDraggingSheet) return;
+        isDraggingSheet = false;
+        readingSheet.style.transition = '';
+
+        const currentY = e.clientY || (e.changedTouches && e.changedTouches[0].clientY) || touchCurrentY;
+        const deltaY = currentY - touchStartY;
+
+        if (deltaY > 80) {
+          resumeAndCloseSheet();
+        } else {
+          readingSheet.style.transform = 'translateY(0)';
+        }
+      }
+
+      /* ------------------------------------------------------------------------
+         SCRUBBER INTERACTION (MOUSE & TOUCH DRAGGING)
+         ------------------------------------------------------------------------ */
+      let isScrubbing = false;
+
+      function handleScrub(e) {
+        const rect = progressTrack.getBoundingClientRect();
+        const clientX = e.clientX || (e.touches && e.touches[0].clientX) || 0;
+        const offsetX = Math.max(0, Math.min(rect.width, clientX - rect.left));
+        const pct = offsetX / rect.width;
+        seekTo(pct * TOTAL_DURATION);
+      }
+
+      /* ------------------------------------------------------------------------
+         EVENT ATTACHMENTS
+         ------------------------------------------------------------------------ */
+      function initEvents() {
+        // City selection
+        cardDelhi.addEventListener('click', () => {
+          screenPicker.classList.remove('is-active');
+          screenPlayer.classList.add('is-active');
+          headerBackBtn.style.display = 'inline-flex';
+          seekTo(0);
+          playFilm();
+        });
+
+        cardDelhi.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            cardDelhi.click();
+          }
+        });
+
+        // Header back button
+        headerBackBtn.addEventListener('click', () => {
+          pauseFilm();
+          if (state.isSheetOpen) resumeAndCloseSheet();
+          hideEndScreen();
+          screenPlayer.classList.remove('is-active');
+          screenPicker.classList.add('is-active');
+          headerBackBtn.style.display = 'none';
+        });
+
+        // Film box tap toggles play/pause
+        filmBox.addEventListener('click', (e) => {
+          if (e.target.closest('#moment-pill') || e.target.closest('#mini-player-overlay')) return;
+          togglePlayPause();
+        });
+
+        // Moment pill tap -> dive in
+        momentPill.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (state.activeMomentIndex >= 0) {
+            openMomentSheet(MOMENTS[state.activeMomentIndex]);
+          }
+        });
+
+        momentPill.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            momentPill.click();
+          }
+        });
+
+        // Mini player resume button
+        miniResumeBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          resumeAndCloseSheet();
+        });
+
+        // Scrubber progress interaction
+        scrubberWrapper.addEventListener('pointerdown', (e) => {
+          isScrubbing = true;
+          handleScrub(e);
+        });
+
+        window.addEventListener('pointermove', (e) => {
+          if (isScrubbing) handleScrub(e);
+        });
+
+        window.addEventListener('pointerup', () => {
+          if (isScrubbing) isScrubbing = false;
+        });
+
+        // Scrubber keyboard arrow support
+        scrubberWrapper.addEventListener('keydown', (e) => {
+          if (e.key === 'ArrowRight') {
+            seekTo(state.currentTime + 3);
+          } else if (e.key === 'ArrowLeft') {
+            seekTo(state.currentTime - 3);
+          }
+        });
+
+        // Moment dots tap on scrubber
+        document.querySelectorAll('.moment-dot').forEach(dot => {
+          dot.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const idx = parseInt(dot.dataset.index, 10);
+            seekTo(MOMENTS[idx].time);
+            openMomentSheet(MOMENTS[idx]);
+          });
+        });
+
+        // Play/Pause button
+        playPauseBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          togglePlayPause();
+        });
+
+        // Rewind 3s button
+        rewind3sBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          seekTo(state.currentTime - 3);
+          showToast('Rewound 3s');
+        });
+
+        // Restart button
+        restartBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          seekTo(0);
+          playFilm();
+        });
+
+        // Tabs toggle
+        tabBtnTimeline.addEventListener('click', () => {
+          tabBtnTimeline.classList.add('is-active');
+          tabBtnTimeline.setAttribute('aria-selected', 'true');
+          tabBtnSaved.classList.remove('is-active');
+          tabBtnSaved.setAttribute('aria-selected', 'false');
+          tabContentTimeline.style.display = 'flex';
+          tabContentSaved.style.display = 'none';
+          state.activeTab = 'timeline';
+        });
+
+        tabBtnSaved.addEventListener('click', () => {
+          tabBtnSaved.classList.add('is-active');
+          tabBtnSaved.setAttribute('aria-selected', 'true');
+          tabBtnTimeline.classList.remove('is-active');
+          tabBtnTimeline.setAttribute('aria-selected', 'false');
+          tabContentSaved.style.display = 'flex';
+          tabContentTimeline.style.display = 'none';
+          state.activeTab = 'saved';
+        });
+
+        // Sheet Keep Watching button
+        sheetKeepWatchingBtn.addEventListener('click', resumeAndCloseSheet);
+
+        // Sheet Close button
+        sheetCloseBtn.addEventListener('click', resumeAndCloseSheet);
+
+        // Sheet Backdrop click closes sheet
+        sheetBackdrop.addEventListener('click', resumeAndCloseSheet);
+
+        // Sheet Bookmark button
+        sheetBookmarkBtn.addEventListener('click', () => {
+          if (state.activeSheetMoment) {
+            toggleBookmark(state.activeSheetMoment.id);
+          }
+        });
+
+        // Swipe down on sheet drag zone
+        sheetDragZone.addEventListener('pointerdown', onPointerDown);
+        readingSheet.addEventListener('pointermove', onPointerMove);
+        window.addEventListener('pointerup', onPointerUp);
+
+        sheetDragZone.addEventListener('touchstart', onPointerDown, { passive: true });
+        readingSheet.addEventListener('touchmove', onPointerMove, { passive: true });
+        window.addEventListener('touchend', onPointerUp, { passive: true });
+
+        // End screen actions
+        endReplayBtn.addEventListener('click', () => {
+          hideEndScreen();
+          seekTo(0);
+          playFilm();
+        });
+
+        endCitiesBtn.addEventListener('click', () => {
+          hideEndScreen();
+          headerBackBtn.click();
+        });
+
+        // Global keyboard shortcuts (Space / K to play-pause, Left/Right arrows, Escape to dismiss sheet)
+        window.addEventListener('keydown', (e) => {
+          // Ignore if focus is in an input or textarea
+          if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+
+          if (e.code === 'Space' || e.key === 'k' || e.key === 'K') {
+            e.preventDefault();
+            togglePlayPause();
+          } else if (e.key === 'Escape') {
+            if (state.isSheetOpen) {
+              resumeAndCloseSheet();
+            } else if (state.isEndScreenOpen) {
+              hideEndScreen();
+            }
+          } else if (e.key === 'ArrowLeft') {
+            seekTo(state.currentTime - 3);
+          } else if (e.key === 'ArrowRight') {
+            seekTo(state.currentTime + 3);
+          }
+        });
+
+        // Handle reduced motion preference dynamic changes
+        window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', (e) => {
+          state.reducedMotion = e.matches;
+        });
+      }
+
+      /* ------------------------------------------------------------------------
+         INITIALIZATION
+         ------------------------------------------------------------------------ */
+      function init() {
+        renderTimelineList();
+        renderSavedList();
+        initEvents();
+        renderFilmFrame(0);
+        updateUI();
+        requestAnimationFrame(updatePlayback);
+      }
+
+      // Launch when DOM is ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+      } else {
+        init();
+      }
+
+    })();
+  </script>
+</body>
+</html>
